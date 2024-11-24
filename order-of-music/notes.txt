@@ -1,0 +1,1 @@
+fourier-transformation (Spectral decomposition) and entropy of audion signal
