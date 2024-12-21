@@ -4,8 +4,7 @@ import time
 import pygame
 import pygame_menu
 import numpy as np
-from typing import Tuple
-from ..base.simulation import Simulation
+from ..systems.simulation import Simulation
 
 
 class PygameShapeDrawer:
@@ -55,16 +54,19 @@ class PygameSession:
         self.meridian = self.screen_size[0] / 2 - 0.1 * self.screen_size[0]
         self.equator = self.screen_size[1] / 2
         self.white = 250
+        # self.screen_color = [self.white, self.white, self.white]
         self.screen_color = [self.white, self.white, self.white]
         # self.cell_color = pygame.Color("aquamarine")
         # self.simulation_area_side_len = 800 
         self.simulation_area_side_len = 600 
+        # self.simulation_area_side_len = 200
         self.cells_drawer = PygameShapeDrawer(simulation_area_side_len = self.simulation_area_side_len, 
                                               cells_number_vertical = self.rows_number, 
                                               cells_number_horizontal = self.columns_number,
                                               shape_string = "circle")
         # writings
         self.font_size = 20
+        
 
     def simulation_steps(self):
         return self.__simulation_steps
@@ -72,7 +74,9 @@ class PygameSession:
     def metrics_strings(self):
         return [f"Simulation Steps Left: {self.simulation_steps()}",
                 f"Number of Columns: {self.columns_number}",
-                f"Number of Rows: {self.rows_number}"]
+                f"Number of Rows: {self.rows_number}",
+                f"''Температура'': -{self.simulation.group.temperature()}",
+                f"''Однородность'': {self.simulation.group.temperature()}"]
         
     def draw_text(self, text: str, x, y):
         green = (0, 255, 0)
@@ -97,23 +101,28 @@ class PygameSession:
         metrics_strings = self.metrics_strings()
         for m in range(len(metrics_strings)):
             metric_string = metrics_strings[m]
-            self.draw_text(metric_string, table_coords[0], table_coords[1] + m * self.font_size)
+            text_x = table_coords[0]
+            text_y = table_coords[1] + m * self.font_size
+            if m == 3:
+                text_y += 100
+            elif m == 4:
+                text_y += 200
+            self.draw_text(metric_string, text_x, text_y)
 
-    def draw_tools_bar(self):
-        menu = pygame_menu.Menu(300, 400, 'Welcome',
-                                theme=pygame_menu.themes.THEME_BLUE)
+    def decrement_group_temperature(self):
+        current = self.simulation.group.temperature()
+        next = current - 1
+        self.simulation.group.set_temperature(next)
+        self.simulation.group.set_communication()
 
-        menu.add_text_input('Name :', default='John Doe')
-        menu.add_selector('Difficulty :', [('Hard', 1), ('Easy', 2)], onchange=set_difficulty)
-        # menu.add_button('Play', start_the_game)
-        menu.add_button('Quit', pygame_menu.events.EXIT)
+    def increment_group_temperature(self):
+        current = self.simulation.group.temperature()
+        next = current + 1
+        self.simulation.group.set_temperature(next)
+        self.simulation.group.set_communication()
 
-        menu.mainloop(self.screen)
-
-        
-
-    def np_to_rgb250(self, rgb_normalized_np) -> Tuple[int]:
-        return tuple(np.round(rgb_normalized_np*self.white).astype(int))
+    # def np_to_rgb250(self, rgb_normalized_np) -> Tuple[int]:
+    #     return tuple(np.round(rgb_normalized_np*self.white).astype(int))
 
     def draw_cell(self, cell_color, x, y):
         return self.cells_drawer.draw_shape(self.screen,
@@ -124,7 +133,10 @@ class PygameSession:
     def draw_column(self, column, x, y):
         for i in range(self.rows_number):
             cell_rgb_normalized = column[i]
-            cell_color = self.np_to_rgb250(cell_rgb_normalized)
+            # cell_color = self.np_to_rgb250(cell_rgb_normalized)
+            
+            cell_color = tuple(np.round(50+cell_rgb_normalized*100).astype(int))
+            
             cell = self.draw_cell(cell_color, x, y + i * self.cells_drawer.h) 
     
     def draw_matrix(self, matrix: np.ndarray):
@@ -150,21 +162,30 @@ class PygameSession:
         self.draw_snap(self.simulation.group.state)
         # running rutin
         self.running = True
+        
         while self.running:
+            
             time.sleep(self.rendering_duration)
+            
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     self.continue_simulation = True
+                    
             if not self.by_mouse:
                 self.continue_simulation = True
+
+            pressed_keys = pygame.key.get_pressed()
+            if pressed_keys[pygame.K_LEFT]:
+                self.decrement_group_temperature()
+            if pressed_keys[pygame.K_RIGHT]:
+                self.increment_group_temperature()
+
+            self.draw_metrics_table()
+            
             if self.continue_simulation and self.__simulation_steps > 0:
                 self.draw_snap(next(self.simulation))
-                
-            self.draw_metrics_table() # TODO make understendable
-
-            self.draw_tools_bar()
         
         pygame.quit()        
         
