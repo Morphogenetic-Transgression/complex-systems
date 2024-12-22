@@ -1,0 +1,9 @@
+
+-- scroller for temperature
+-- automatic filling of state space (4 posibple values of parameter etc)
+-- not permitted states according to neighbors (communication)
+-- communication changes degrees of fridom
+
+-- https://www.pymunk.org/en/latest/index.html
+-- https://google.github.io/liquidfun/
+

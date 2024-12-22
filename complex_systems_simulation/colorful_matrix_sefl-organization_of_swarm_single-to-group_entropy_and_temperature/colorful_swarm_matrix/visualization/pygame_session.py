@@ -58,8 +58,8 @@ class PygameSession:
         self.screen_color = [self.white, self.white, self.white]
         # self.cell_color = pygame.Color("aquamarine")
         # self.simulation_area_side_len = 800 
-        self.simulation_area_side_len = 600 
-        # self.simulation_area_side_len = 200
+        # self.simulation_area_side_len = 600 
+        self.simulation_area_side_len = 400
         self.cells_drawer = PygameShapeDrawer(simulation_area_side_len = self.simulation_area_side_len, 
                                               cells_number_vertical = self.rows_number, 
                                               cells_number_horizontal = self.columns_number,
