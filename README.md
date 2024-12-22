@@ -9,7 +9,7 @@ https://www.askpython.com/python/examples/amplitude-of-wav-files
 https://www.geeksforgeeks.org/spectrum-analysis-in-python/
 
 
-#animated histogram
+# animated histogram
 
 https://matplotlib.org/stable/gallery/animation/animated_histogram.html#sphx-glr-gallery-animation-animated-histogram-py
 
@@ -37,3 +37,13 @@ https://docs.python-telegram-bot.org/en/stable/index.html
 # julia dynamics
 
 https://github.com/JuliaDynamics
+
+
+# communication changes degrees of fridom
+
+https://www.pymunk.org/en/latest/index.html
+
+https://google.github.io/liquidfun/
+
+
+
