@@ -69,6 +69,10 @@ class MultiParticle():
     def state(self):
         return np.array([particle.state for particle in self.__particles])
     
+    def velocities(self):
+        return [np.sqrt(np.dot(particle.velocity, 
+                               particle.velocity)) for particle in self.__particles]
+    
     def colors(self):
         return [particle.color for particle in self.__particles]
 
@@ -92,9 +96,9 @@ class MultiParticle():
                 
                 v_x_next, v_y_next = particle.velocity
                 
-                if (x >= self.__width/2 - particle.radius) or (x <= -self.__width/2 + particle.radius):
+                if (x > self.__width/2 - particle.radius) or (x < -self.__width/2 + particle.radius):
                     v_x_next = -v_x_next
-                if (y >= self.__height/2 - particle.radius) or (y <= -self.__height/2 + particle.radius):
+                if (y > self.__height/2 - particle.radius) or (y < -self.__height/2 + particle.radius):
                     v_y_next = -v_y_next
                     
                 v_particle_next = np.array([v_x_next, v_y_next])
