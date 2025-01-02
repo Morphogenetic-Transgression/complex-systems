@@ -1,2 +1,2 @@
-from .system import MultiAgent
+from .system import MultiCell
 from .simulation import Simulation

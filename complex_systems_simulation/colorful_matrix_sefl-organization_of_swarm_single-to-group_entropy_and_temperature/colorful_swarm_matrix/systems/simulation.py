@@ -1,10 +1,10 @@
 from typing import Iterator
 import numpy as np
-from .system import MultiAgent
+from .system import MultiCell
 
 
 class Simulation(Iterator):
-    def __init__(self, group: MultiAgent, steps_number: int):
+    def __init__(self, group: MultiCell, steps_number: int):
         self.group = group
         self.steps_number = steps_number
         
