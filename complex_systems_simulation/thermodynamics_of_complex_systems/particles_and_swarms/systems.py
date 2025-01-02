@@ -59,9 +59,11 @@ class MultiParticle():
     def __init__(self, 
                  particles: List[ParticleMechanical],
                  width,
-                 height):
+                 height,
+                 periodic: bool):
         self.__particles = particles
         self.__height, self.__width = height, width
+        self.__periodic = periodic
 
     @property
     def state(self):
@@ -77,8 +79,6 @@ class MultiParticle():
             
     def collision_detection(self):
         
-        # with the walls
-        
         ignore_list = []
         
         for particle in self.__particles:
@@ -86,15 +86,32 @@ class MultiParticle():
                 continue
             
             x, y = particle.state
-            v_x_next, v_y_next = particle.velocity
             
-            if (x >= self.__width/2 - particle.radius) or (x <= -self.__width/2 + particle.radius):
-                v_x_next = -v_x_next
-            if (y >= self.__height/2 - particle.radius) or (y <= -self.__height/2 + particle.radius):
-                v_y_next = -v_y_next
+            if not self.__periodic:
+                # with the walls
                 
-            v_particle_next = np.array([v_x_next, v_y_next])
-            particle.set_velocity(v_particle_next)
+                v_x_next, v_y_next = particle.velocity
+                
+                if (x >= self.__width/2 - particle.radius) or (x <= -self.__width/2 + particle.radius):
+                    v_x_next = -v_x_next
+                if (y >= self.__height/2 - particle.radius) or (y <= -self.__height/2 + particle.radius):
+                    v_y_next = -v_y_next
+                    
+                v_particle_next = np.array([v_x_next, v_y_next])
+                particle.set_velocity(v_particle_next)
+                
+            else:
+                if x > self.__width/2:
+                    x = -self.__width/2
+                if x < -self.__width/2:
+                    x = self.__width/2
+                if y > self.__height/2:
+                    y = -self.__height/2
+                if y < -self.__height/2:
+                    y = self.__height/2
+                
+                
+                particle.set_state(np.array([x, y]))
             
             # with neighbour
             for neighbour in self.__particles:
