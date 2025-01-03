@@ -69,13 +69,25 @@ class MultiParticle():
     def state(self):
         return np.array([particle.state for particle in self.__particles])
     
+    def colors(self):
+        return [particle.color for particle in self.__particles]
+    
     def velocities(self):
         return [np.sqrt(np.dot(particle.velocity, 
                                particle.velocity)) for particle in self.__particles]
     
-    def colors(self):
-        return [particle.color for particle in self.__particles]
-
+    def energy_average(self):
+        energy_average = 0
+        for particle in self.__particles:
+            energy_average += 0.5 * particle.mass * np.dot(particle.velocity,
+                                                           particle.velocity)
+        energy_average /= len(self.__particles)
+        return energy_average
+    
+    def temperature_theoretical(self):
+        k_b = 1.380649E-23
+        return self.energy_average()*(2/3)/k_b
+        
     def step(self):
         self.collision_detection()
         for particle in self.__particles:
