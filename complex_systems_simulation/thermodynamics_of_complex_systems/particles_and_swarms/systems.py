@@ -84,7 +84,7 @@ class MultiParticle():
         energy_average /= len(self.__particles)
         return energy_average
     
-    def temperature_theoretical(self):
+    def temperature_energy_average(self):
         k_b = 1.380649E-23
         return self.energy_average()*(2/3)/k_b
         
