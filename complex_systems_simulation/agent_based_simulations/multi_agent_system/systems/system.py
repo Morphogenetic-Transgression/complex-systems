@@ -107,5 +107,3 @@ class MultiCell():
 
     def set_temperature(self, temperature):
         self.__temperature = min(max(temperature, 0), STATE_SPACE_LENGTH)
-
-
