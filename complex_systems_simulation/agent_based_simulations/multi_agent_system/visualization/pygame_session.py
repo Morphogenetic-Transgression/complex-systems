@@ -75,8 +75,8 @@ class PygameSession:
         return [f"Simulation Steps Left: {self.simulation_steps()}",
                 f"Number of Columns: {self.columns_number}",
                 f"Number of Rows: {self.rows_number}",
-                f"''Температура'': -{self.simulation.group.temperature()}",
-                f"''Однородность'': {self.simulation.group.temperature()}"]
+                f"''Температура'': -{self.simulation.group.temperature}",
+                f"''Однородность'': {self.simulation.group.temperature}"]
         
     def draw_text(self, text: str, x, y):
         green = (0, 255, 0)
@@ -110,16 +110,16 @@ class PygameSession:
             self.draw_text(metric_string, text_x, text_y)
 
     def decrement_group_temperature(self):
-        current = self.simulation.group.temperature()
-        next = current - 1
-        self.simulation.group.set_temperature(next)
-        self.simulation.group.set_communication()
+        current_T = self.simulation.group.temperature
+        next_T = current_T - 1
+        self.simulation.group.set_temperature(next_T)
+        self.simulation.group.set_communication_rules()
 
     def increment_group_temperature(self):
-        current = self.simulation.group.temperature()
-        next = current + 1
-        self.simulation.group.set_temperature(next)
-        self.simulation.group.set_communication()
+        current_T = self.simulation.group.temperature
+        next_T = current_T + 1
+        self.simulation.group.set_temperature(next_T)
+        self.simulation.group.set_communication_rules()
 
     # def np_to_rgb250(self, rgb_normalized_np) -> Tuple[int]:
     #     return tuple(np.round(rgb_normalized_np*self.white).astype(int))
@@ -185,7 +185,7 @@ class PygameSession:
             self.draw_metrics_table()
             
             if self.continue_simulation and self.__simulation_steps > 0:
-                self.draw_snap(next(self.simulation))
+                self.draw_snap(next(self.simulation)) # here the simulation step heppens
         
         pygame.quit()        
         

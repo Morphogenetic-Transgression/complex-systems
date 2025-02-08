@@ -9,7 +9,7 @@ class Simulation(Iterator):
         self.steps_number = steps_number
         
     def __next__(self) -> np.ndarray:
-        self.group.transition()
+        self.group.step()
         return self.group.state
 
     def __iter__(self) -> Iterator:
