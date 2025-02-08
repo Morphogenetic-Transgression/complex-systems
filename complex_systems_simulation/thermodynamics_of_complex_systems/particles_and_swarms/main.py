@@ -12,7 +12,7 @@ NUMBER_OF_PARTICLES = 200
 SURFACE_WIDTH = 10
 SURFACE_HEIGHT = 10
 DIMMENSION = 2
-RADIUS = 2E-2
+RADIUS = 4E-2
 
 SAMPLING_TIME = 50E-5 # 6 when smaller box
 
@@ -21,11 +21,11 @@ SURFACE_PERIODIC = False
 SIMULATION_NAME = "Particles on Torus" if SURFACE_PERIODIC else "Particles in Box"
 
 FRAMES_NUMBER = 2400
-DELAY_BETWEEN_FRAMES = 1/30 # in milliseconds
+DELAY_BETWEEN_FRAMES = 1/300 # in milliseconds
 
 k_b = 1.380649E-23
 
-PROTON_MASS = 1.66E-27
+PROTON_MASS = 1.66E-27 # kilograms
 MASS_ZENON = 127 * PROTON_MASS # 127 ZENON
 TEMPERATURE_ZENON_INIT = 298.15
 SPEED_ZENON_AVG = np.sqrt(3/2*k_b*TEMPERATURE_ZENON_INIT*2/MASS_ZENON)
@@ -56,7 +56,7 @@ particles_velocities_range = np.arange(0, 500, SPACING_BETWEEN_VALUES_IN_VELOCIT
 
 AVERAGING_NUMBER = 500 # how many frames are averaged for using in barchart (smooser)
 
-scatter_size = 10
+scatter_size = 5
 
 fig, (ax1, ax2) = plt.subplots(figsize=(5, 9), nrows=2)
 
@@ -65,6 +65,7 @@ ax1.set_xticks([]), ax1.set_yticks([])
 ax1.set_aspect("equal")
 ax1.set_xlim(-SURFACE_WIDTH/2, SURFACE_WIDTH/2)
 ax1.set_ylim(-SURFACE_HEIGHT/2, SURFACE_HEIGHT/2)
+ax1.set(xlabel=f"{SURFACE_WIDTH} meters", ylabel=f"{SURFACE_HEIGHT} meters")
 
 scatter = ax1.scatter([], [], scatter_size)
 temperature_txt = ax1.text(SURFACE_WIDTH/2*0.4, SURFACE_HEIGHT/2*0.92, s="")

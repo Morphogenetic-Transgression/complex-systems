@@ -1,2 +1,2 @@
 
-обобщить, абстрагировать из механических в любые
+TODO generalize, abstragate from mechanical to any (communicational)
