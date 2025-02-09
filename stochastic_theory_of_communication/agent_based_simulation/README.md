@@ -26,6 +26,9 @@ PRACTICAL NOTES:
 Currently matplotlib is going to be used for visualization.
 manim is good for formulas and mani other things, but for visualization of particles it is better to use more light tool
 
+https://matplotlib.org/stable/gallery/animation/animated_histogram.html#sphx-glr-gallery-animation-animated-histogram-py
+
+
 maybe somewhen will be used:
 -- https://www.pymunk.org/en/latest/index.html
 -- https://google.github.io/liquidfun/
@@ -33,5 +36,7 @@ maybe somewhen will be used:
 (stochastic communication theory) --> complex ssytems thermodynemics
 
 
-for graphics mudules: ... 
+for graphics mudules: PyQt, ..., in pygame there is no scrollbars
+
+
 
