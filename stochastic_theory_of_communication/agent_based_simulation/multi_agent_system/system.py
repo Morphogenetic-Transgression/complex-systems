@@ -38,6 +38,9 @@ class Cell:
 
     def choice_random_state():  # from the univers (dependance on the cosmos)
         return Cell.STATE_SPACE[np.random.choice(Cell.STATE_SPACE_SIZE)]
+    
+    def entropy():
+        ...
 
 
 class MultiCell():
@@ -55,6 +58,12 @@ class MultiCell():
     @property
     def temperature(self):
         return self.__temperature
+    
+    def entropy_additive(self):
+        ...
+        
+    def entropy_join(self): # synergistic
+        ...
 
     def step_of_cell(self, cell_current_state, not_permitted_neighbors):
         cell_next_state = Cell.choice_random_state()
