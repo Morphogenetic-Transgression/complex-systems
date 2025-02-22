@@ -1,1 +1,0 @@
-import visualization.matplotlib_animation
