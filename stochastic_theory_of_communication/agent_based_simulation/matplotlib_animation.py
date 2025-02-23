@@ -15,7 +15,7 @@ from multi_agent_system import MultiCell, Simulation
 
 
 # simulation constants
-STEPS_IN_SIMULATION = 500
+STEPS_IN_SIMULATION = 5000
 ROWS_NUMBER = 10
 COLUMNS_NUMBER = 10
 DEPTH = 3
@@ -67,30 +67,16 @@ FRAMES_NUMBER = STEPS_IN_SIMULATION
 DELAY_BETWEEN_FRAMES = 1000 * DURATION_OF_ANIMATION / FRAMES_NUMBER  # in milliseconds
 
 
-# plot UI figure
-fig_ui, [ax_bars, ax_slider, ax_button] = plt.subplots(nrows=3, ncols=1, figsize=(8, 5))
+# ======================================================= plot UI figure
+fig_ui, [ax_bars, ax_slider, ax_button] = plt.subplots(nrows=3, ncols=1, figsize=(5, 5))
 
-
-"""
-fig_ui, ax_ui = plt.subplot_mosaic(
-    [
-        ["slider", "slider", "bars", "checks"],
-        ["reset_slider", "reset_checks", "bars", "checks"],
-    ],
-    # width_ratios=[5, 1],
-    layout="constrained",
-)
-# l, = ax['main'].plot(t, s0, lw=2, color='red')
-"""
-
-# plot Entropies bars
+# ======================================================= plot Entropies bars
 cells_entropies = simulation.group.entropies_of_cells()
 cells_indexes = list(range(len(cells_entropies)))
 
 scatter_bars = ax_bars.scatter(cells_indexes, cells_entropies, 10)
 ax_bars.set_xticks(list(range(0, len(cells_entropies), 10)))
 ax_bars.set_yticks([0, 1, 2, 3])
-# ax_bars.set_aspect(30)
 ax_bars.set_xlim(0, 100)
 ax_bars.set_ylim(0, 3)
 ax_bars.set(xlabel="cell", ylabel="entropy")
@@ -98,12 +84,10 @@ ax_bars.set_title("Entropies of Cells")
 
 axcolor = "lightgoldenrodyellow"
 
-# plot Slider
-# ax_slider.set_aspect(30)
-# ax_slider = plt.axes([0.25, 0.07, 0.65, 0.03], facecolor=axcolor)
-slider_temperature = Slider(
-    ax_slider,  # ax_ui["slider"],
-    "# permited \n states",  # engagement; Cohesion
+# ======================================================= plot Slider
+slider_state_space_size = Slider(
+    ax_slider,
+    "State \n Space \n Size",  # engagement; Cohesion
     TEMPERATURE_MIN,
     TEMPERATURE_MAX,
     valinit=TEMPERATURE_INIT,
@@ -112,8 +96,8 @@ slider_temperature = Slider(
 
 
 def update(val):
-    number_of_permitted_states = slider_temperature.val
-    simulation.group.set_number_of_permitted_states(number_of_permitted_states)
+    state_space_size = slider_state_space_size.val
+    simulation.group.set_cells_state_space_size(state_space_size)
 
     scatter_bars_coords = []
     entropies_of_cells = simulation.group.entropies_of_cells()
@@ -122,41 +106,91 @@ def update(val):
     scatter_bars.set_offsets(scatter_bars_coords)
 
 
-slider_temperature.on_changed(update)
+slider_state_space_size.on_changed(update)
 
-# plot Button reset_slider
-# ax_button.set_aspect(30)
-# ax_reset = plt.axes([0.8, 0.025, 0.1, 0.04])
-button_reset_slider = Button(
-    ax_button, "Reset", hovercolor="0.975"  # ax_ui["reset_slider"],
-)
+# ======================================================= plot Button reset_slider
+button_reset_slider = Button(ax_button, "Reset", hovercolor="0.975")
 
 
-def reset(event):
-    slider_temperature.reset()
+def reset_slider(event):
+    slider_state_space_size.reset()
 
 
-button_reset_slider.on_clicked(reset)
-
-"""
-TODO add new tools (mayby slyders for individual entropies)
-
-# plot Button reset_checks
-button_reset_checks = Button(
-    ax_ui["reset_checks"], "reset_checks", hovercolor="0.975"
-)
-
-# plot Entropies bars
-entropies_bars = ax_ui["bars"].plot()
-
-# plot check boxes
-check_boxes = PolygonSelector(ax_ui["checks"])
-"""
+button_reset_slider.on_clicked(reset_slider)
 
 fig_ui.show()
 
+# ======================================================= plot CheckButtons
+CHECKBOXES_COLUMNS_NUMBER = COLUMNS_NUMBER
+CHECKBOXES_ROWS_NUMBER = ROWS_NUMBER
 
-# plot animation figure
+fig_checkboxes, ax_checkboxes = plt.subplot_mosaic(
+    [
+        [f"checks_row_{i}" for i in range(CHECKBOXES_COLUMNS_NUMBER)],
+        ["apply" for i in range(CHECKBOXES_COLUMNS_NUMBER)],
+        ["clear" for i in range(CHECKBOXES_COLUMNS_NUMBER)],
+    ],
+    height_ratios=[5, 1, 1],
+    layout="constrained",
+    figsize=(5, 5),
+)
+fig_checkboxes.suptitle("Set Up Connections", fontsize=14)
+
+# check_boxes
+check_boxes = [
+    CheckButtons(
+        ax_checkboxes[f"checks_row_{i}"], labels=list(range(CHECKBOXES_ROWS_NUMBER))
+    )
+    for i in range(CHECKBOXES_COLUMNS_NUMBER)
+]
+
+# button_apply_check_boxes
+button_apply_check_boxes = Button(
+    ax_checkboxes["apply"], "Set as Neighbors", hovercolor="0.975"
+)
+# ax_checkboxes["apply"].set_aspect(1 / 40)
+
+
+def apply_check_boxes(event):
+    communication_table = np.zeros((ROWS_NUMBER, COLUMNS_NUMBER))
+    for w in range(CHECKBOXES_COLUMNS_NUMBER):
+        column_status = check_boxes[w].get_status()
+        for h in range(CHECKBOXES_ROWS_NUMBER):
+            if column_status[h]:
+                communication_table[h][w] = 1
+    print(communication_table)
+    print()
+    simulation.group.set_neighborhude(communication_table)
+
+    # reset entropies
+    scatter_bars_coords = []
+    entropies_of_cells = simulation.group.entropies_of_cells()
+    for cell_index, entropy in enumerate(entropies_of_cells):
+        scatter_bars_coords.append([cell_index, entropy])
+    scatter_bars.set_offsets(scatter_bars_coords)
+
+
+button_apply_check_boxes.on_clicked(apply_check_boxes)
+
+
+# button_reset_check_boxes
+button_reset_check_boxes = Button(ax_checkboxes["clear"], "Clear", hovercolor="0.975")
+# ax_checkboxes["clear"].set_aspect(1 / 40)
+
+
+def reset_check_boxes(event):
+    for w in range(CHECKBOXES_COLUMNS_NUMBER):
+        check_boxes[w].clear()  # TODO clear is very slow
+    simulation.group.reset_neighborhude()
+
+
+button_reset_check_boxes.on_clicked(reset_check_boxes)
+
+
+fig_checkboxes.show()
+
+
+# ======================================================= plot animation figure
 fig_animation, ax_scatter = plt.subplots(figsize=FIGURE_SIZE)
 fig_animation.suptitle(SIMULATION_NAME, fontsize=14)
 
