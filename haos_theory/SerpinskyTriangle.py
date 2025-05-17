@@ -3,10 +3,15 @@ import sys
 import random
 import time
 
+font_ = pygame.font.Font("freesansbold.ttf", 36)
+
+DOT_SIZE = 2
+
+
 def pp():
     x = round(random.random() * 600)
     y = round(random.random() * 400)
-    return pygame.draw.circle(screen, [0,0,0], [x, y], 2, 0)
+    return pygame.draw.circle(screen, [0, 0, 0], [x, y], DOT_SIZE, 0)
 
 
 pygame.init()
@@ -25,25 +30,29 @@ D = pp()
 pygame.display.flip()
 
 running = flag = True
-sec = 0.01
+
+wait_sec = 0.01
+
 
 while running:
-    time.sleep(sec)
+
+    time.sleep(wait_sec)
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             flag = not flag
-        '''
-        elif event.type == pygame.MOUSEBUTTONUP:
-            sec += 0.1
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            if sec != 0:
-                sec -= 0.1
-        '''
+
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                wait_sec = max(0.0, wait_sec - 0.01)  # decrease delay
+            elif event.key == pygame.K_DOWN:
+                wait_sec += 0.01  # increase delay
+
     pres = D
     inFront = 0
-    z = random.randint(1,3)
+    z = random.randint(1, 3)
     if z == 1:
         inFront = A
     if z == 2:
@@ -55,7 +64,11 @@ while running:
     x = round((inFrontCords[0] - presCords[0]) / 2 + presCords[0])
     y = round((inFrontCords[1] - presCords[1]) / 2 + presCords[1])
     if flag:
-        D = pygame.draw.circle(screen, [0,0,0], [x, y], 2, 0)
+        D = pygame.draw.circle(screen, [0, 0, 0], [x, y], DOT_SIZE, 0)
         pygame.display.flip()
-    
+
+    text = font_.render(f"Sleep time: {wait_sec:.2f}s", True, (255, 255, 255))
+    screen.blit(text, (50, 130))
+    pygame.display.flip()
+
 pygame.quit()
