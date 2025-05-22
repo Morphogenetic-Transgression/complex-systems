@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Shaders Demo For Complex Systems</title>
+    <meta charset="utf-8" />
+    <script src="https://cdn.jsdelivr.net/npm/three-js@79.0.0/three.min.js"></script>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <script id="vertexShader" type="x-shader/x-vertex">
+      // vertex shader's code goes here
+      void main() {
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position.x+10.0, position.y, position.z+5.0, 1.0);
+      }
+    </script>
+    <script id="fragmentShader" type="x-shader/x-fragment">
+      // fragment shader's code goes here
+      void main() {
+        gl_FragColor = vec4(0.0, 0.58, 0.86, 1.0);
+      }
+    </script>
+    <script src="./index.js"></script>
+  </body>
+</html>
