@@ -12,6 +12,15 @@ plan:
     inspired by Lourenze Attractor and this visualisation of irrational nature of pi
 
     I thought there is Deterministic Chaos in pi but there is not
+
+    Phase Space = (exp(theta * i), exp(pi * theta * i));
+    Phase Projection (Torus) = (theta mod 2pi, pi * theta mod 2pi);
+    Embedding of Phase Projection in R^3. Pase Trajectory does not intersect itself.
+
+    I have seen this animation. The curve never closes. So I thought that there might be some othere curve in some other
+    space that does not intersect itself. This curve actualy lives in C^2 (formula). But in order to visualise it I had to draw an
+    embedding in R^3 of phase projection which is torus.
+
 """
 
 import numpy as np
@@ -88,7 +97,7 @@ class Torus:
 
         # return np.array([self.cos_theta, self.cos_pi_theta, self.theta_])
 
-        R = 2
+        R = 4
         r = 2
         u = self.theta
         v = self.theta * np.pi
@@ -273,14 +282,20 @@ text_3, scatter_3, trail_3, trail_x_data_3, trail_y_data_3 = axis_initialize(
     3,
     title=r"$z = e^{i \cdot \theta} + e^{\pi \cdot i \cdot \theta}$"
     + " (quasi-periodic because of "
-    + r"$\pi$)",
+    + r"$\pi$)"
+    + "\n The curve never closes.",
     title_color="r",
 )
 
 trail_3d, trail_x_data_3d, trail_y_data_3d, trail_z_data_3d = axis_3d_initialize(
-    ax4, 4, title="Image on Torus (Non-self-intersecting Curve) (Projection)"
+    ax4,
+    4,
+    title="Phase Projection of "
+    + r"$(e^{i \cdot \theta}, e^{\pi \cdot i \cdot \theta})$"
+    + " embedded into "
+    + r"$\mathbb{R}^3$"
+    + ". Phase Trajectory does not intersect itself.",
 )
-
 
 # animation
 
