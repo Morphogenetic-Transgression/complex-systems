@@ -16,7 +16,9 @@ plan:
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 from matplotlib.animation import FuncAnimation
+from matplotlib.widgets import Button
 
 
 def z_1(theta):
@@ -67,6 +69,7 @@ class Torus:
         self.theta_prev = self.theta
         self.omega = omega_init
 
+    """
     @property
     def cos_theta(self) -> float:
         return np.cos(self.theta)
@@ -78,10 +81,25 @@ class Torus:
     @property
     def theta_(self) -> float:
         return self.theta % (2 * np.pi)
+    """
 
     @property
     def state(self) -> np.ndarray:
-        return np.array([self.cos_theta, self.cos_pi_theta, self.theta_])
+
+        # return np.array([self.cos_theta, self.cos_pi_theta, self.theta_])
+
+        R = 2
+        r = 2
+        u = self.theta
+        v = self.theta * np.pi
+
+        x = R * np.cos(u) + r * np.cos(v) * np.cos(u)
+
+        y = R * np.sin(u) + r * np.cos(v) * np.sin(u)
+
+        z = r * np.sin(v)
+
+        return np.array([x, y, z])
 
     def cycles_number(self) -> int:
         return int(self.theta / (2 * np.pi))
@@ -91,11 +109,12 @@ class Torus:
 
 
 # constants
-SAMPLING_TIME = 50e-3  # seconds in mechanical step of system
-FPS = 200000
-ANIMATION_DURATION = 1000  # seconds
-FRAMES_NUMBER = int(ANIMATION_DURATION * FPS)
-DELAY_BETWEEN_FRAMES_MILLISEC = 1000 / FPS  # in milliseconds
+SAMPLING_TIME = 0.05  # seconds in mechanical step of system
+SIMULATION_DURATION = 10  # seconds of real system time
+STEPS_IN_SIMULATION = np.arange(0, SIMULATION_DURATION, SAMPLING_TIME)
+SKIP_N = 50  # animate every 5th step
+FRAMES_NUMBER = range(0, len(STEPS_IN_SIMULATION), SKIP_N)
+DELAY_BETWEEN_FRAMES_MILLISEC = 1  # each frame appears for 0.02 seconds on screen
 
 SURFACE_WIDTH = 10  # TODO rename
 SURFACE_HEIGHT = 10
@@ -104,8 +123,7 @@ SIMULATION_NAME = r"Transcendentality of $\pi$ causes Quasiperiodicity"
 
 
 # utilites
-def axis_initialize(fig, index_, title, title_color=None):
-    ax = fig.add_subplot(2, 2, index_)
+def axis_initialize(ax, index_, title, title_color=None):
 
     ax.set_title(title)
     if title_color:
@@ -128,7 +146,7 @@ def axis_initialize(fig, index_, title, title_color=None):
     if index_ == 1:
         text = ax.text(-(SURFACE_HEIGHT / 2) * 0.92, (SURFACE_HEIGHT / 2) * 0.92, s="")
 
-    return ax, text, scatter, trail, trail_x_data, trail_y_data
+    return text, scatter, trail, trail_x_data, trail_y_data
 
 
 def axis_draw_dynamics(pis, text, scatter, trail, trail_x_data, trail_y_data):
@@ -141,18 +159,20 @@ def axis_draw_dynamics(pis, text, scatter, trail, trail_x_data, trail_y_data):
     return text, scatter, trail, trail_x_data, trail_y_data
 
 
-def axis_3d_initialize(fig, index_, title):
-    ax = fig.add_subplot(2, 2, index_, projection="3d")
+def axis_3d_initialize(ax, index_, title):
 
     ax.set_title(title)
-    ax.set_aspect("equal")
+    # ax.set_aspect("equal")
     ax.set_xlim(-SURFACE_WIDTH / 2, SURFACE_WIDTH / 2)
     ax.set_ylim(-SURFACE_HEIGHT / 2, SURFACE_HEIGHT / 2)
     ax.set_zlim(-SURFACE_HEIGHT / 2, SURFACE_HEIGHT / 2)
     ax.set(
-        xlabel=r"$\cos(\theta)$",
-        ylabel=r"$\cos(\pi \cdot \theta)$",
-        zlabel=r"$\theta$" + " mod " + r"$2 \cdot \pi$",
+        xlabel=r"$\cos(\theta) \cdot (1 + \cos(\pi \cdot \theta))$",
+        ylabel=r"$\sin(\theta) \cdot (1 + \cos(\pi \cdot \theta))$",
+        zlabel=r"$\sin(\pi \cdot \theta)$",
+        # xlabel=r"$\cos(\theta)$",
+        # ylabel=r"$\cos(\pi \cdot \theta)$",
+        # zlabel=r"$\theta$" + " mod " + r"$2 \cdot \pi$",
     )
     ax.set_xticks([]),
     ax.set_yticks([])
@@ -164,7 +184,7 @@ def axis_3d_initialize(fig, index_, title):
     trail_y_data = []
     trail_z_data = []  # Lists to store the trajectory
 
-    return ax, trail, trail_x_data, trail_y_data, trail_z_data
+    return trail, trail_x_data, trail_y_data, trail_z_data
 
 
 def axis_3d_draw_dynamics(sys, trail, trail_x_data, trail_y_data, trail_z_data):
@@ -181,10 +201,10 @@ def axis_3d_draw_dynamics(sys, trail, trail_x_data, trail_y_data, trail_z_data):
     return trail, trail_x_data, trail_y_data, trail_z_data
 
 
-omega_init = 1.6
-
-
 # system init
+
+omega_init = 1.3
+
 pis_1 = QuasiPeriodicSystem(
     z=z_1,
     sampling_time=SAMPLING_TIME,
@@ -217,52 +237,84 @@ pis_3d = Torus(
 )
 
 
-# plotting and animation
-fig = plt.figure(figsize=(10, 10))
+# plotting attributes
+fig = plt.figure(figsize=(20, 10))
+fig.suptitle(SIMULATION_NAME, fontsize=14)
+gs = gridspec.GridSpec(2, 3)
 
 
-ax_1, text_1, scatter_1, trail_1, trail_x_data_1, trail_y_data_1 = axis_initialize(
-    fig, 1, title=r"$z = e^{i \cdot \theta}$"
+ax1 = fig.add_subplot(gs[0, 0])
+box1 = ax1.get_position()
+ax1.set_position([box1.x0 - 0.1, box1.y0 - 0.0, box1.width * 1, box1.height * 1])
+
+ax2 = fig.add_subplot(gs[1, 0])
+box2 = ax2.get_position()
+ax2.set_position([box2.x0 - 0.1, box2.y0 - 0.0, box2.width * 1, box2.height * 1])
+
+ax3 = fig.add_subplot(gs[:, 1])
+box3 = ax3.get_position()
+ax3.set_position([box3.x0 - 0.12, box3.y0 - 0.07, box3.width * 1.2, box3.height * 1.2])
+
+ax4 = fig.add_subplot(gs[:, 2], projection="3d")
+box4 = ax4.get_position()
+ax4.set_position([box4.x0 - 0.11, box4.y0 - 0.17, box4.width * 1.8, box4.height * 1.8])
+
+
+text_1, scatter_1, trail_1, trail_x_data_1, trail_y_data_1 = axis_initialize(
+    ax1, 1, title=r"$z = e^{i \cdot \theta}$" + " (periodic)"
 )
-ax_2, text_2, scatter_2, trail_2, trail_x_data_2, trail_y_data_2 = axis_initialize(
-    fig, 2, title=r"$z = e^{i \cdot \theta} + e^{3 \cdot i \cdot \theta}$"
+text_2, scatter_2, trail_2, trail_x_data_2, trail_y_data_2 = axis_initialize(
+    ax2,
+    2,
+    title=r"$z = e^{i \cdot \theta} + e^{3 \cdot i \cdot \theta}$" + " (periodic)",
 )
-ax_3, text_3, scatter_3, trail_3, trail_x_data_3, trail_y_data_3 = axis_initialize(
-    fig,
+text_3, scatter_3, trail_3, trail_x_data_3, trail_y_data_3 = axis_initialize(
+    ax3,
     3,
-    title=r"$z = e^{i \cdot \theta} + e^{\pi \cdot i \cdot \theta}$",
+    title=r"$z = e^{i \cdot \theta} + e^{\pi \cdot i \cdot \theta}$"
+    + " (quasi-periodic because of "
+    + r"$\pi$)",
     title_color="r",
 )
 
-ax_3d, trail_3d, trail_x_data_3d, trail_y_data_3d, trail_z_data_3d = axis_3d_initialize(
-    fig, 4, title="Non-self-intersecting Projection"
+trail_3d, trail_x_data_3d, trail_y_data_3d, trail_z_data_3d = axis_3d_initialize(
+    ax4, 4, title="Image on Torus (Non-self-intersecting Curve) (Projection)"
 )
+
+
+# animation
+
+paused = [True]  # mutable so it can be modified from nested scope
 
 
 def update_plot(frame):
 
     global text_1, scatter_1, trail_1, trail_x_data_1, trail_y_data_1, text_2, scatter_2, trail_2, trail_x_data_2, trail_y_data_2, text_3, scatter_3, trail_3, trail_x_data_3, trail_y_data_3, trail_3d, trail_x_data_3d, trail_y_data_3d, trail_z_data_3d
 
-    text_1, scatter_1, trail_1, trail_x_data_1, trail_y_data_1 = axis_draw_dynamics(
-        pis_1, text_1, scatter_1, trail_1, trail_x_data_1, trail_y_data_1
-    )
+    if not paused[0]:
 
-    text_2, scatter_2, trail_2, trail_x_data_2, trail_y_data_2 = axis_draw_dynamics(
-        pis_2, text_2, scatter_2, trail_2, trail_x_data_2, trail_y_data_2
-    )
+        text_1, scatter_1, trail_1, trail_x_data_1, trail_y_data_1 = axis_draw_dynamics(
+            pis_1, text_1, scatter_1, trail_1, trail_x_data_1, trail_y_data_1
+        )
 
-    text_3, scatter_3, trail_3, trail_x_data_3, trail_y_data_3 = axis_draw_dynamics(
-        pis_3, text_3, scatter_3, trail_3, trail_x_data_3, trail_y_data_3
-    )
+        text_2, scatter_2, trail_2, trail_x_data_2, trail_y_data_2 = axis_draw_dynamics(
+            pis_2, text_2, scatter_2, trail_2, trail_x_data_2, trail_y_data_2
+        )
 
-    trail_3d, trail_x_data_3d, trail_y_data_3d, trail_z_data_3d = axis_3d_draw_dynamics(
-        pis_3d, trail_3d, trail_x_data_3d, trail_y_data_3d, trail_z_data_3d
-    )
+        text_3, scatter_3, trail_3, trail_x_data_3, trail_y_data_3 = axis_draw_dynamics(
+            pis_3, text_3, scatter_3, trail_3, trail_x_data_3, trail_y_data_3
+        )
 
-    pis_1.step()
-    pis_2.step()
-    pis_3.step()
-    pis_3d.step()
+        trail_3d, trail_x_data_3d, trail_y_data_3d, trail_z_data_3d = (
+            axis_3d_draw_dynamics(
+                pis_3d, trail_3d, trail_x_data_3d, trail_y_data_3d, trail_z_data_3d
+            )
+        )
+
+        pis_1.step()
+        pis_2.step()
+        pis_3.step()
+        pis_3d.step()
 
     return (
         text_1,
@@ -282,12 +334,24 @@ animation = FuncAnimation(
     fig=fig,
     func=update_plot,
     frames=FRAMES_NUMBER,
-    blit=True,
     interval=DELAY_BETWEEN_FRAMES_MILLISEC,
-    repeat=False,
-    save_count=FRAMES_NUMBER,
+    blit=True,
+    # repeat=False,
+    # save_count=FRAMES_NUMBER,
 )
 
-fig.suptitle(SIMULATION_NAME, fontsize=14)
+
+# Add pause/play button
+button_ax = plt.axes([0.8, 0.025, 0.1, 0.04])  # x, y, width, height
+button = Button(button_ax, "Play", hovercolor="0.975")
+
+
+def toggle(event):
+    paused[0] = not paused[0]
+    button.label.set_text("Play" if paused[0] else "Pause")
+
+
+button.on_clicked(toggle)
+
 
 plt.show()
