@@ -28,7 +28,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.animation import FuncAnimation
-from matplotlib.widgets import Button
+from matplotlib.widgets import Button, Slider
 
 
 class QuasiPeriodicPiSystem:
@@ -42,7 +42,7 @@ class QuasiPeriodicPiSystem:
         torus_r=2,
     ):
         self.step = step_init
-        self.theta = np.linspace(0, 100 * np.pi, steps_number)
+        self.theta = np.linspace(0, 200 * np.pi, steps_number)
         self.frequencies = frequencies
         self.torus_R = torus_R
         self.torus_r = torus_r
@@ -57,8 +57,8 @@ class QuasiPeriodicPiSystem:
         self.cycles_number = (self.theta / (2 * np.pi)).astype(int)
 
         inC2 = self._inC2()  # z.real z.imag
-        self.plane_x = inC2.real
-        self.plane_y = inC2.imag
+        self.plane_x = 2 * inC2.real
+        self.plane_y = 2 * inC2.imag
 
         if len(self.frequencies) == 2:
             u = self.theta * self.frequencies[0]
@@ -77,10 +77,10 @@ class QuasiPeriodicPiSystem:
 
 # constants
 
-STEPS_IN_SIMULATION = 4000
-SIMULATION_ANIMATION_RATIO = 2
+STEPS_IN_SIMULATION = 10000
+SIMULATION_ANIMATION_RATIO = 1
 FRAMES_NUMBER = STEPS_IN_SIMULATION // SIMULATION_ANIMATION_RATIO
-DELAY_BETWEEN_FRAMES_MILLISEC = 30
+DELAY_BETWEEN_FRAMES_MILLISEC = 20
 
 SURFACE_WIDTH = 10
 SURFACE_HEIGHT = 10
@@ -163,7 +163,6 @@ def axis_3d_draw_dynamics(scatter, trail, system, step):
 
 
 # system init
-
 system_1 = QuasiPeriodicPiSystem(
     step_init=0,
     steps_number=STEPS_IN_SIMULATION,
@@ -241,24 +240,23 @@ scatter_3d, trail_3d = axis_3d_initialize(
 u = np.linspace(0, 2 * np.pi, 60)
 v = np.linspace(0, 2 * np.pi, 30)
 U, V = np.meshgrid(u, v)
-X = (R + r * np.cos(V)) * np.cos(U)
-Y = (R + r * np.cos(V)) * np.sin(U)
-Z = r * np.sin(V)
-ax.plot_surface(X, Y, Z, alpha=0.1, color="gray")
+X = (system_3.torus_R + system_3.torus_r * np.cos(V)) * np.cos(U)
+Y = (system_3.torus_R + system_3.torus_r * np.cos(V)) * np.sin(U)
+Z = system_3.torus_r * np.sin(V)
+ax4.plot_surface(X, Y, Z, alpha=0.1, color="gray")
 """
-
 
 # animation
 
-paused = [True]  # mutable so it can be modified from nested scope
+paused = [True]
 step = 1
 
 
 def update_plot(frame):
 
-    global step, text_1, scatter_1, trail_1, text_2, scatter_2, trail_2, text_3, scatter_3, trail_3, scatter_3d, trail_3d
+    global SIMULATION_ANIMATION_RATIO, step, text_1, scatter_1, trail_1, text_2, scatter_2, trail_2, text_3, scatter_3, trail_3, scatter_3d, trail_3d
 
-    if not paused[0]:
+    if (not paused[0]) and step < STEPS_IN_SIMULATION:
 
         scatter_1, trail_1, text_1 = axis_draw_dynamics(
             scatter_1, trail_1, text_1, system_1, step
@@ -300,7 +298,9 @@ animation = FuncAnimation(
 )
 
 
-# Add pause/play button
+# wigets
+
+# button
 button_ax = plt.axes([0.8, 0.025, 0.1, 0.04])  # x, y, width, height
 button = Button(button_ax, "Play", hovercolor="0.975")
 
@@ -311,6 +311,25 @@ def toggle(event):
 
 
 button.on_clicked(toggle)
+
+
+# Slider
+slider_ax = plt.axes([0.3, 0.1, 0.2, 0.03])  # [left, bottom, width, height]
+# slider_min = 10
+# slider_max = 200
+slider_min = 1
+slider_max = 10
+slider_init = SIMULATION_ANIMATION_RATIO
+slider = Slider(slider_ax, "Speed", slider_min, slider_max, valinit=slider_init)
+
+
+def update_speed(val):
+    global SIMULATION_ANIMATION_RATIO
+    # animation.event_source.interval = slider.val
+    SIMULATION_ANIMATION_RATIO = int(slider.val)
+
+
+slider.on_changed(update_speed)
 
 
 plt.show()
