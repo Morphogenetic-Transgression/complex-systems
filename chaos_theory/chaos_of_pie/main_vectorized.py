@@ -61,9 +61,10 @@ class QuasiPeriodicPiSystem:
         self.plane_y = 2 * inC2.imag
 
         if len(self.frequencies) == 2:
+
+            # Cartesian
             u = self.theta * self.frequencies[0]
             v = self.theta * self.frequencies[1]
-
             self.torus_x = self.torus_R * np.cos(u) + self.torus_r * np.cos(v) * np.cos(
                 u
             )
@@ -71,6 +72,17 @@ class QuasiPeriodicPiSystem:
                 u
             )
             self.torus_z = self.torus_r * np.sin(v)
+
+            # toroidal
+            self.torus_phi = np.arctan(self.torus_y / self.torus_x)
+            ro = np.sqrt(np.power(self.torus_x, 2) + np.power(self.torus_y, 2))
+            a = 4
+            d1 = np.sqrt(np.power((ro + a), 2) + np.power(self.torus_z, 2))
+            d2 = np.sqrt(np.power((ro - a), 2) + np.power(self.torus_z, 2))
+            self.torus_tau = np.log(d1 / d2)
+            self.torus_sigma = np.sign(self.torus_z) * np.arccos(
+                (np.power(d1, 2) + np.power(d2, 2) - 4 * np.power(a, 2)) / (2 * d1 * d2)
+            )
         else:
             print("No torus")
 
@@ -152,12 +164,21 @@ def axis_3d_initialize(ax, index_, title):
 
 
 def axis_3d_draw_dynamics(scatter, trail, system, step):
-
     scatter.set_data(system.torus_x[step - 1 : step], system.torus_y[step - 1 : step])
     scatter.set_3d_properties(system.torus_z[step - 1 : step])
 
     trail.set_data(system.torus_x[:step], system.torus_y[:step])
     trail.set_3d_properties(system.torus_z[:step])
+
+    """
+    scatter.set_data(
+        system.torus_tau[step - 1 : step], system.torus_sigma[step - 1 : step]
+    )
+    scatter.set_3d_properties(system.torus_phi[step - 1 : step])
+
+    trail.set_data(system.torus_tau[:step], system.torus_sigma[:step])
+    trail.set_3d_properties(system.torus_phi[:step])
+    """
 
     return scatter, trail
 
