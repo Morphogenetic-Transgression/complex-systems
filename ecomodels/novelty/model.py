@@ -31,6 +31,12 @@ class Sun(EnergySource):
 class Earth(EnergySource, EnergyConsumer):
     """
     Earth without art is just 'Eh'
+
+    dispel - рассеивать
+    exploit - использовать, употреблять
+
+    reframing of the second law is therefore that work necessarily
+    means turning high-quality energy into lower-quality energy
     """
 
     def __init__(self, capacity, discharge_min, discharge_max, efficiency):
