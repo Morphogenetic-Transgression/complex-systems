@@ -1,2 +1,0 @@
-
-TODO generalize, abstragate from mechanical to any (communicational)
